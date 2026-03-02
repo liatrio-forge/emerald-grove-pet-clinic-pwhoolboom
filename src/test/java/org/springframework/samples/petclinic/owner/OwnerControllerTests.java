@@ -639,7 +639,7 @@ class OwnerControllerTests {
 
 	@Test
 	@WithMockUser(username = "admin@petclinic.com", roles = "ADMIN")
-	void testShowOwner_canEditIsFalseForAdmin() throws Exception {
+	void testShowOwner_canEditIsTrueForAdmin() throws Exception {
 		User adminUser = new User();
 		adminUser.setEmail("admin@petclinic.com");
 		adminUser.setRole(Role.ADMIN);
@@ -647,7 +647,7 @@ class OwnerControllerTests {
 
 		mockMvc.perform(get("/owners/{ownerId}", TEST_OWNER_ID))
 			.andExpect(status().isOk())
-			.andExpect(model().attribute("canEdit", false));
+			.andExpect(model().attribute("canEdit", true));
 	}
 
 	@Test

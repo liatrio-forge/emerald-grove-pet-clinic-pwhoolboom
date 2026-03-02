@@ -296,11 +296,8 @@ class OwnerController {
 			if (!currentUser.getOwner().getId().equals(ownerId)) {
 				throw new AccessDeniedException("Access denied");
 			}
-			mav.addObject("canEdit", true);
 		}
-		else {
-			mav.addObject("canEdit", false);
-		}
+		mav.addObject("canEdit", true);
 		mav.addObject(owner);
 		return mav;
 	}

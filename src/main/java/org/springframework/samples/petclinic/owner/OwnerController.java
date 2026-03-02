@@ -21,10 +21,15 @@ import java.util.Optional;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.samples.petclinic.security.User;
+import org.springframework.samples.petclinic.security.UserRepository;
 import org.springframework.samples.petclinic.system.ResourceNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -55,8 +60,20 @@ class OwnerController {
 
 	private final OwnerRepository owners;
 
-	public OwnerController(OwnerRepository owners) {
+	private final UserRepository userRepository;
+
+	public OwnerController(OwnerRepository owners, UserRepository userRepository) {
 		this.owners = owners;
+		this.userRepository = userRepository;
+	}
+
+	private boolean isOwnerRoleUser(Authentication auth) {
+		return auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_OWNER"));
+	}
+
+	private User resolveCurrentUser(Authentication auth) {
+		return userRepository.findByEmail(auth.getName())
+			.orElseThrow(() -> new IllegalStateException("Authenticated user not found: " + auth.getName()));
 	}
 
 	@InitBinder
@@ -111,7 +128,7 @@ class OwnerController {
 
 	@GetMapping("/owners")
 	public String processFindForm(@RequestParam(defaultValue = "1") int page, Owner owner, BindingResult result,
-			Model model) {
+			Model model, Authentication auth) {
 		// Normalize empty strings to null so the repository treats them as "no filter"
 		String lastName = nullIfEmpty(owner.getLastName());
 		String telephone = nullIfEmpty(owner.getTelephone());
@@ -124,6 +141,22 @@ class OwnerController {
 		}
 
 		Page<Owner> ownersResults = findPaginatedByFilters(page, lastName, telephone, city);
+
+		// For OWNER-role users, filter results to only show their own record
+		if (isOwnerRoleUser(auth)) {
+			User currentUser = resolveCurrentUser(auth);
+			int linkedOwnerId = currentUser.getOwner().getId();
+			List<Owner> filtered = ownersResults.getContent()
+				.stream()
+				.filter(o -> o.getId() != null && o.getId().equals(linkedOwnerId))
+				.toList();
+			if (filtered.isEmpty()) {
+				result.reject("notFound", "not found");
+				return "owners/findOwners";
+			}
+			return "redirect:/owners/" + filtered.get(0).getId();
+		}
+
 		if (ownersResults.isEmpty()) {
 			result.reject("notFound", "not found");
 			return "owners/findOwners";
@@ -195,13 +228,26 @@ class OwnerController {
 	}
 
 	@GetMapping("/owners/{ownerId}/edit")
-	public String initUpdateOwnerForm() {
+	public String initUpdateOwnerForm(@PathVariable("ownerId") int ownerId, Authentication auth) {
+		if (isOwnerRoleUser(auth)) {
+			User currentUser = resolveCurrentUser(auth);
+			if (!currentUser.getOwner().getId().equals(ownerId)) {
+				throw new AccessDeniedException("Access denied");
+			}
+		}
 		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 	}
 
 	@PostMapping("/owners/{ownerId}/edit")
 	public String processUpdateOwnerForm(@Valid Owner owner, BindingResult result, @PathVariable("ownerId") int ownerId,
-			RedirectAttributes redirectAttributes) {
+			RedirectAttributes redirectAttributes, Authentication auth) {
+		if (isOwnerRoleUser(auth)) {
+			User currentUser = resolveCurrentUser(auth);
+			if (!currentUser.getOwner().getId().equals(ownerId)) {
+				throw new AccessDeniedException("Access denied");
+			}
+		}
+
 		if (result.hasErrors()) {
 			redirectAttributes.addFlashAttribute("error", "There was an error in updating the owner.");
 			return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
@@ -240,11 +286,18 @@ class OwnerController {
 	 * @return a ModelMap with the model attributes for the view
 	 */
 	@GetMapping("/owners/{ownerId}")
-	public ModelAndView showOwner(@PathVariable("ownerId") int ownerId) {
+	public ModelAndView showOwner(@PathVariable("ownerId") int ownerId, Authentication auth) {
 		ModelAndView mav = new ModelAndView("owners/ownerDetails");
 		Optional<Owner> optionalOwner = this.owners.findById(ownerId);
 		Owner owner = optionalOwner.orElseThrow(() -> new ResourceNotFoundException(
 				"Owner not found with id: " + ownerId + ". Please ensure the ID is correct "));
+		if (isOwnerRoleUser(auth)) {
+			User currentUser = resolveCurrentUser(auth);
+			if (!currentUser.getOwner().getId().equals(ownerId)) {
+				throw new AccessDeniedException("Access denied");
+			}
+		}
+		mav.addObject("canEdit", true);
 		mav.addObject(owner);
 		return mav;
 	}

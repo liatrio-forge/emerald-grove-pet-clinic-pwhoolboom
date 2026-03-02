@@ -54,3 +54,13 @@ CREATE TABLE IF NOT EXISTS visits (
   description VARCHAR(255),
   FOREIGN KEY (pet_id) REFERENCES pets(id)
 ) engine=InnoDB;
+
+CREATE TABLE IF NOT EXISTS users (
+  id            INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  email         VARCHAR(255) NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  role          VARCHAR(20)  NOT NULL,
+  owner_id      INT(4) UNSIGNED,
+  UNIQUE (email),
+  FOREIGN KEY (owner_id) REFERENCES owners(id)
+) engine=InnoDB;

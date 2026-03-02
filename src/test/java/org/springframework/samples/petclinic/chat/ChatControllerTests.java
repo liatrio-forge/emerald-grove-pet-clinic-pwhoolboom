@@ -16,10 +16,12 @@
 
 package org.springframework.samples.petclinic.chat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,6 +30,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.samples.petclinic.security.OwnerAuthenticationSuccessHandler;
+import org.springframework.samples.petclinic.security.UserRepository;
+import org.springframework.samples.petclinic.security.WebMvcTestSecurityConfig;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.aot.DisabledInAotMode;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -37,6 +45,8 @@ import reactor.core.publisher.Flux;
 @WebMvcTest(ChatController.class)
 @DisabledInNativeImage
 @DisabledInAotMode
+@WithMockUser
+@Import(WebMvcTestSecurityConfig.class)
 class ChatControllerTests {
 
 	@Autowired
@@ -45,22 +55,30 @@ class ChatControllerTests {
 	@MockitoBean
 	private ChatService chatService;
 
+	@MockitoBean
+	private UserRepository userRepository;
+
+	@MockitoBean
+	private OwnerAuthenticationSuccessHandler ownerAuthenticationSuccessHandler;
+
 	@Test
 	void validRequest_returns200AndSseContentType() throws Exception {
-		given(chatService.chat(anyString(), anyString())).willReturn(Flux.just("Hello", " world"));
+		given(chatService.chat(anyString(), anyString(), any())).willReturn(Flux.just("Hello", " world"));
 
 		mockMvc
-			.perform(post("/api/chat").contentType(APPLICATION_JSON)
+			.perform(post("/api/chat").with(csrf())
+				.contentType(APPLICATION_JSON)
 				.content("{\"message\":\"hi\",\"sessionId\":\"s1\"}"))
 			.andExpect(status().isOk());
 	}
 
 	@Test
 	void validRequest_responseIsTextEventStream() throws Exception {
-		given(chatService.chat(anyString(), anyString())).willReturn(Flux.just("Hello", " world"));
+		given(chatService.chat(anyString(), anyString(), any())).willReturn(Flux.just("Hello", " world"));
 
 		mockMvc
-			.perform(post("/api/chat").contentType(APPLICATION_JSON)
+			.perform(post("/api/chat").with(csrf())
+				.contentType(APPLICATION_JSON)
 				.content("{\"message\":\"hi\",\"sessionId\":\"s1\"}"))
 			.andExpect(content().contentTypeCompatibleWith(TEXT_EVENT_STREAM));
 	}
@@ -68,15 +86,29 @@ class ChatControllerTests {
 	@Test
 	void blankMessage_returns400() throws Exception {
 		mockMvc
-			.perform(post("/api/chat").contentType(APPLICATION_JSON).content("{\"message\":\"\",\"sessionId\":\"s1\"}"))
+			.perform(post("/api/chat").with(csrf())
+				.contentType(APPLICATION_JSON)
+				.content("{\"message\":\"\",\"sessionId\":\"s1\"}"))
 			.andExpect(status().isBadRequest());
 	}
 
 	@Test
 	void blankSessionId_returns400() throws Exception {
 		mockMvc
-			.perform(post("/api/chat").contentType(APPLICATION_JSON).content("{\"message\":\"hi\",\"sessionId\":\"\"}"))
+			.perform(post("/api/chat").with(csrf())
+				.contentType(APPLICATION_JSON)
+				.content("{\"message\":\"hi\",\"sessionId\":\"\"}"))
 			.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	@WithAnonymousUser
+	void unauthenticatedRequest_returns401() throws Exception {
+		mockMvc
+			.perform(post("/api/chat").with(csrf())
+				.contentType(APPLICATION_JSON)
+				.content("{\"message\":\"hi\",\"sessionId\":\"s1\"}"))
+			.andExpect(status().isUnauthorized());
 	}
 
 }

@@ -1,9 +1,9 @@
 import { test, expect } from '@fixtures/base-test';
 
 test.describe('Owner CSV Export', () => {
-  test('GET /owners.csv returns text/csv with header row', async ({ request }) => {
-    // Act
-    const response = await request.get('/owners.csv');
+  test('GET /owners.csv returns text/csv with header row', async ({ page }) => {
+    // Act — use page.request so the authenticated browser cookies are included
+    const response = await page.request.get('/owners.csv');
     const body = await response.text();
 
     // Assert

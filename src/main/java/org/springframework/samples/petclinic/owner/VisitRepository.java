@@ -42,4 +42,19 @@ public interface VisitRepository extends JpaRepository<Visit, Integer> {
 	List<UpcomingVisit> findUpcomingVisits(@Param("startDate") LocalDate startDate,
 			@Param("endDate") LocalDate endDate);
 
+	@Query("""
+			SELECT new org.springframework.samples.petclinic.owner.UpcomingVisit(
+			    o.id,
+			    CONCAT(o.firstName, ' ', o.lastName),
+			    p.name,
+			    v.date,
+			    v.description)
+			FROM Owner o JOIN o.pets p JOIN p.visits v
+			WHERE v.date >= :startDate AND v.date <= :endDate
+			AND o.id = :ownerId
+			ORDER BY v.date ASC
+			""")
+	List<UpcomingVisit> findUpcomingVisitsByOwnerId(@Param("ownerId") int ownerId,
+			@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
 }

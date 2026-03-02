@@ -18,6 +18,7 @@ export default defineConfig({
   outputDir: 'test-results/artifacts',
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:8080',
+    storageState: 'test-results/.auth/admin.json',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure'

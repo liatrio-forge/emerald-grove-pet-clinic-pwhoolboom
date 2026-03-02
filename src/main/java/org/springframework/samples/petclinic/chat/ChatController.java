@@ -17,6 +17,9 @@
 package org.springframework.samples.petclinic.chat;
 
 import org.springframework.http.MediaType;
+import org.springframework.samples.petclinic.security.User;
+import org.springframework.samples.petclinic.security.UserRepository;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,13 +38,36 @@ class ChatController {
 
 	private final ChatService chatService;
 
-	ChatController(ChatService chatService) {
+	private final UserRepository userRepository;
+
+	ChatController(ChatService chatService, UserRepository userRepository) {
 		this.chatService = chatService;
+		this.userRepository = userRepository;
 	}
 
 	@PostMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-	Flux<ChatResponse> chat(@Valid @RequestBody ChatRequest request) {
-		return chatService.chat(request.sessionId(), request.message()).map(ChatResponse::new);
+	Flux<ChatResponse> chat(@Valid @RequestBody ChatRequest request, Authentication auth) {
+		String userContext = buildUserContext(auth);
+		return chatService.chat(request.sessionId(), request.message(), userContext).map(ChatResponse::new);
+	}
+
+	private String buildUserContext(Authentication auth) {
+		if (auth == null) {
+			return null;
+		}
+		return userRepository.findByEmail(auth.getName()).map(user -> {
+			String displayName = user.getOwner() != null
+					? user.getOwner().getFirstName() + " " + user.getOwner().getLastName() : user.getEmail();
+			String role = user.getRole().name();
+			if ("OWNER".equals(role)) {
+				return "The current user is " + displayName
+						+ " (role: OWNER). Only provide information relevant to this user's pets and visits.";
+			}
+			else {
+				return "The current user is " + displayName
+						+ " (role: ADMIN). This user has access to all clinic data.";
+			}
+		}).orElse(null);
 	}
 
 }

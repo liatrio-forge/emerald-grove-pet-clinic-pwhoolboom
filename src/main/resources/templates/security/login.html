@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+
+<html xmlns:th="https://www.thymeleaf.org" lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="#{login.title}">Login - Emerald Grove Veterinary Clinic</title>
+  <link rel="shortcut icon" type="image/x-icon" th:href="@{/resources/images/emerald-grove-logo-icon-dark.png}">
+  <link th:href="@{/webjars/font-awesome/css/font-awesome.min.css}" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/resources/css/petclinic.css}" />
+</head>
+
+<body class="liatrio-app">
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-5">
+        <div class="card shadow">
+          <div class="card-body p-4">
+            <h4 class="card-title text-center mb-4" th:text="#{layoutTitle}">Emerald Grove Veterinary Clinic</h4>
+            <h5 class="text-center mb-3" th:text="#{login.heading}">Sign In</h5>
+
+            <div th:if="${param.error}" class="alert alert-danger" role="alert" th:text="#{login.error}">
+            </div>
+            <div th:if="${param.logout}" class="alert alert-success" role="alert" th:text="#{login.logout}">
+            </div>
+
+            <form method="post" th:action="@{/login}">
+              <div class="mb-3">
+                <label for="username" class="form-label" th:text="#{login.email.label}">Email address</label>
+                <input type="email" class="form-control" id="username" name="username"
+                       placeholder="Enter your email" required autofocus />
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label" th:text="#{login.password.label}">Password</label>
+                <input type="password" class="form-control" id="password" name="password"
+                       placeholder="Enter your password" required />
+              </div>
+              <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary" th:text="#{login.submit}">Sign In</button>
+              </div>
+            </form>
+
+            <hr />
+            <div class="text-center">
+              <p>
+                <span th:text="#{login.register.prompt}">Don't have an account?</span>
+                <a th:href="@{/register}" th:text="#{login.register.link}">Register here</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script th:src="@{/webjars/bootstrap/dist/js/bootstrap.bundle.min.js}"></script>
+</body>
+
+</html>

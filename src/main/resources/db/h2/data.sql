@@ -51,3 +51,15 @@ INSERT INTO visits VALUES (default, 7, DATEADD('DAY', 1, CURRENT_DATE), 'rabies 
 INSERT INTO visits VALUES (default, 8, DATEADD('DAY', 3, CURRENT_DATE), 'rabies shot');
 INSERT INTO visits VALUES (default, 8, '2013-01-03', 'neutered');
 INSERT INTO visits VALUES (default, 7, '2013-01-04', 'spayed');
+
+INSERT INTO users VALUES (default, 'admin@petclinic.com', '$2a$10$TQwj5I4Nsm79rik6h5vObu3NGu.3WjlbTJElnDifC2.lnsEi8n4LC', 'ADMIN', null);
+INSERT INTO users VALUES (default, 'george.franklin@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 1);
+INSERT INTO users VALUES (default, 'betty.davis@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 2);
+INSERT INTO users VALUES (default, 'eduardo.rodriquez@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 3);
+INSERT INTO users VALUES (default, 'harold.davis@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 4);
+INSERT INTO users VALUES (default, 'peter.mctavish@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 5);
+INSERT INTO users VALUES (default, 'jean.coleman@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 6);
+INSERT INTO users VALUES (default, 'jeff.black@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 7);
+INSERT INTO users VALUES (default, 'maria.escobito@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 8);
+INSERT INTO users VALUES (default, 'david.schroeder@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 9);
+INSERT INTO users VALUES (default, 'carlos.estaban@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 10);

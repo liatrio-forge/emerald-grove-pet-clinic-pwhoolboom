@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'owners')}">
+
+<body>
+
+  <h2 th:text="#{register.heading}">Register</h2>
+  <form th:object="${registrationForm}" class="form-horizontal" method="post" th:action="@{/register}">
+    <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger" role="alert">
+      <ul class="list-unstyled mb-0">
+        <li th:each="error : ${#fields.globalErrors()}" th:text="${error}"></li>
+      </ul>
+    </div>
+    <div class="form-group has-feedback">
+      <div th:with="valid=${!#fields.hasErrors('email')}" th:class="${'form-group' + (valid ? '' : ' has-error')}" class="form-group">
+        <label for="email" class="col-sm-2 control-label" th:text="#{register.email.label}">Email</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="email" th:field="*{email}" />
+          <th:block th:if="${!valid}">
+            <span class="fa fa-remove form-control-feedback" aria-hidden="true"></span>
+            <span class="help-inline" th:errors="*{email}"></span>
+          </th:block>
+        </div>
+      </div>
+      <div th:with="valid=${!#fields.hasErrors('password')}" th:class="${'form-group' + (valid ? '' : ' has-error')}" class="form-group">
+        <label for="password" class="col-sm-2 control-label" th:text="#{register.password.label}">Password</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="password" th:field="*{password}" />
+          <th:block th:if="${!valid}">
+            <span class="fa fa-remove form-control-feedback" aria-hidden="true"></span>
+            <span class="help-inline" th:errors="*{password}"></span>
+          </th:block>
+        </div>
+      </div>
+      <div th:with="valid=${!#fields.hasErrors('firstName')}" th:class="${'form-group' + (valid ? '' : ' has-error')}" class="form-group">
+        <label for="firstName" class="col-sm-2 control-label" th:text="#{firstName}">First Name</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" th:field="*{firstName}" />
+          <th:block th:if="${!valid}">
+            <span class="fa fa-remove form-control-feedback" aria-hidden="true"></span>
+            <span class="help-inline" th:errors="*{firstName}"></span>
+          </th:block>
+        </div>
+      </div>
+      <div th:with="valid=${!#fields.hasErrors('lastName')}" th:class="${'form-group' + (valid ? '' : ' has-error')}" class="form-group">
+        <label for="lastName" class="col-sm-2 control-label" th:text="#{lastName}">Last Name</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" th:field="*{lastName}" />
+          <th:block th:if="${!valid}">
+            <span class="fa fa-remove form-control-feedback" aria-hidden="true"></span>
+            <span class="help-inline" th:errors="*{lastName}"></span>
+          </th:block>
+        </div>
+      </div>
+      <div th:with="valid=${!#fields.hasErrors('address')}" th:class="${'form-group' + (valid ? '' : ' has-error')}" class="form-group">
+        <label for="address" class="col-sm-2 control-label" th:text="#{address}">Address</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" th:field="*{address}" />
+          <th:block th:if="${!valid}">
+            <span class="fa fa-remove form-control-feedback" aria-hidden="true"></span>
+            <span class="help-inline" th:errors="*{address}"></span>
+          </th:block>
+        </div>
+      </div>
+      <div th:with="valid=${!#fields.hasErrors('city')}" th:class="${'form-group' + (valid ? '' : ' has-error')}" class="form-group">
+        <label for="city" class="col-sm-2 control-label" th:text="#{city}">City</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" th:field="*{city}" />
+          <th:block th:if="${!valid}">
+            <span class="fa fa-remove form-control-feedback" aria-hidden="true"></span>
+            <span class="help-inline" th:errors="*{city}"></span>
+          </th:block>
+        </div>
+      </div>
+      <div th:with="valid=${!#fields.hasErrors('telephone')}" th:class="${'form-group' + (valid ? '' : ' has-error')}" class="form-group">
+        <label for="telephone" class="col-sm-2 control-label" th:text="#{telephone}">Telephone</label>
+        <div class="col-sm-10">
+          <input class="form-control" type="text" th:field="*{telephone}" />
+          <th:block th:if="${!valid}">
+            <span class="fa fa-remove form-control-feedback" aria-hidden="true"></span>
+            <span class="help-inline" th:errors="*{telephone}"></span>
+          </th:block>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button class="btn btn-primary" type="submit" th:text="#{register.submit}">Register</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <p>
+          <span th:text="#{register.login.prompt}">Already have an account?</span>
+          <a th:href="@{/login}" th:text="#{register.login.link}">Login</a>
+        </p>
+      </div>
+    </div>
+  </form>
+</body>
+
+</html>

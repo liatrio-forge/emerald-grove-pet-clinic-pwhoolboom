@@ -18,24 +18,34 @@ package org.springframework.samples.petclinic.chat;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.samples.petclinic.owner.Owner;
 import org.springframework.samples.petclinic.owner.PetType;
 import org.springframework.samples.petclinic.owner.PetTypeRepository;
 import org.springframework.samples.petclinic.owner.UpcomingVisit;
 import org.springframework.samples.petclinic.owner.VisitRepository;
+import org.springframework.samples.petclinic.security.Role;
+import org.springframework.samples.petclinic.security.User;
+import org.springframework.samples.petclinic.security.UserRepository;
 import org.springframework.samples.petclinic.vet.Specialty;
 import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.samples.petclinic.vet.VetRepository;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,12 +60,39 @@ class ChatToolsTests {
 	@Mock
 	private VisitRepository visitRepository;
 
+	@Mock
+	private UserRepository userRepository;
+
 	@InjectMocks
 	private ChatTools chatTools;
 
 	@BeforeEach
 	void injectClinicInfo() {
 		ReflectionTestUtils.setField(chatTools, "clinicInfo", "Test clinic info");
+	}
+
+	@AfterEach
+	void clearSecurityContext() {
+		SecurityContextHolder.clearContext();
+	}
+
+	private void setOwnerSecurityContext(String email, int ownerId) {
+		User user = new User();
+		user.setEmail(email);
+		user.setRole(Role.OWNER);
+		Owner owner = new Owner();
+		owner.setId(ownerId);
+		user.setOwner(owner);
+		when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+		var auth = new UsernamePasswordAuthenticationToken(email, null,
+				List.of(new SimpleGrantedAuthority("ROLE_OWNER")));
+		SecurityContextHolder.getContext().setAuthentication(auth);
+	}
+
+	private void setAdminSecurityContext(String email) {
+		var auth = new UsernamePasswordAuthenticationToken(email, null,
+				List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+		SecurityContextHolder.getContext().setAuthentication(auth);
 	}
 
 	// ---------------------------------------------------------------------------
@@ -188,6 +225,67 @@ class ChatToolsTests {
 	@Test
 	void getClinicInfo_returnsInjectedString() {
 		assertThat(chatTools.getClinicInfo()).isEqualTo("Test clinic info");
+	}
+
+	// ---------------------------------------------------------------------------
+	// Security-aware getUpcomingVisits
+	// ---------------------------------------------------------------------------
+
+	@Test
+	void getUpcomingVisits_ownerContext_returnsOnlyOwnerVisits() {
+		setOwnerSecurityContext("george.franklin@petclinic.com", 1);
+
+		UpcomingVisit georgeVisit = new UpcomingVisit(1, "George Franklin", "Leo", LocalDate.of(2026, 3, 1), "checkup");
+		when(visitRepository.findUpcomingVisitsByOwnerId(eq(1), any(LocalDate.class), any(LocalDate.class)))
+			.thenReturn(List.of(georgeVisit));
+
+		List<VisitSummary> result = chatTools.getUpcomingVisits();
+
+		assertThat(result).hasSize(1);
+		assertThat(result.get(0).ownerName()).isEqualTo("George Franklin");
+	}
+
+	@Test
+	void getUpcomingVisits_adminContext_returnsAllVisits() {
+		setAdminSecurityContext("admin@petclinic.com");
+
+		UpcomingVisit georgeVisit = new UpcomingVisit(1, "George Franklin", "Leo", LocalDate.of(2026, 3, 1), "checkup");
+		UpcomingVisit jeanVisit = new UpcomingVisit(6, "Jean Coleman", "Samantha", LocalDate.of(2026, 3, 2), "shots");
+		when(visitRepository.findUpcomingVisits(any(LocalDate.class), any(LocalDate.class)))
+			.thenReturn(List.of(georgeVisit, jeanVisit));
+
+		List<VisitSummary> result = chatTools.getUpcomingVisits();
+
+		assertThat(result).hasSize(2);
+	}
+
+	@Test
+	void getUpcomingVisitsForOwner_ownerContext_ignoresOwnerParamAndReturnsOwnVisits() {
+		setOwnerSecurityContext("george.franklin@petclinic.com", 1);
+
+		UpcomingVisit georgeVisit = new UpcomingVisit(1, "George Franklin", "Leo", LocalDate.of(2026, 3, 1), "checkup");
+		when(visitRepository.findUpcomingVisitsByOwnerId(eq(1), any(LocalDate.class), any(LocalDate.class)))
+			.thenReturn(List.of(georgeVisit));
+
+		List<VisitSummary> result = chatTools.getUpcomingVisitsForOwner("Coleman");
+
+		assertThat(result).hasSize(1);
+		assertThat(result.get(0).ownerName()).isEqualTo("George Franklin");
+	}
+
+	@Test
+	void getUpcomingVisitsForOwner_adminContext_usesOwnerNameFilter() {
+		setAdminSecurityContext("admin@petclinic.com");
+
+		UpcomingVisit georgeVisit = new UpcomingVisit(1, "George Franklin", "Leo", LocalDate.of(2026, 3, 1), "checkup");
+		UpcomingVisit jeanVisit = new UpcomingVisit(6, "Jean Coleman", "Samantha", LocalDate.of(2026, 3, 2), "shots");
+		when(visitRepository.findUpcomingVisits(any(LocalDate.class), any(LocalDate.class)))
+			.thenReturn(List.of(georgeVisit, jeanVisit));
+
+		List<VisitSummary> result = chatTools.getUpcomingVisitsForOwner("Coleman");
+
+		assertThat(result).hasSize(1);
+		assertThat(result.get(0).ownerName()).isEqualTo("Jean Coleman");
 	}
 
 }

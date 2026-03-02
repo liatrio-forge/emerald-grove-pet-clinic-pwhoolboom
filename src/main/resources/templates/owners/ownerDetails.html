@@ -33,7 +33,7 @@
     </tr>
   </table>
 
-  <a th:href="@{__${owner.id}__/edit}" class="btn btn-primary" th:text="#{editOwner}">Edit
+  <a th:if="${canEdit}" th:href="@{__${owner.id}__/edit}" class="btn btn-primary" th:text="#{editOwner}">Edit
     Owner</a>
   <a th:href="@{__${owner.id}__/pets/new}" class="btn btn-primary" th:text="#{addNewPet}">Add
     New Pet</a>
@@ -103,6 +103,7 @@
           <button type="button" class="btn btn-secondary"
                   data-bs-dismiss="modal" th:text="#{deletePet.confirm.cancel}">Cancel</button>
           <form id="deletePetForm" method="post">
+              <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
             <button type="submit" class="btn btn-danger"
                     th:text="#{deletePet.confirm.button}">Confirm Delete</button>
           </form>

@@ -23,8 +23,12 @@ import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.samples.petclinic.owner.PetTypeRepository;
 import org.springframework.samples.petclinic.owner.VisitRepository;
+import org.springframework.samples.petclinic.security.User;
+import org.springframework.samples.petclinic.security.UserRepository;
 import org.springframework.samples.petclinic.vet.Specialty;
 import org.springframework.samples.petclinic.vet.VetRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -43,13 +47,30 @@ class ChatTools {
 
 	private final VisitRepository visitRepository;
 
+	private final UserRepository userRepository;
+
 	@Value("${petclinic.chat.clinic-info}")
 	private String clinicInfo;
 
-	ChatTools(VetRepository vetRepository, PetTypeRepository petTypeRepository, VisitRepository visitRepository) {
+	ChatTools(VetRepository vetRepository, PetTypeRepository petTypeRepository, VisitRepository visitRepository,
+			UserRepository userRepository) {
 		this.vetRepository = vetRepository;
 		this.petTypeRepository = petTypeRepository;
 		this.visitRepository = visitRepository;
+		this.userRepository = userRepository;
+	}
+
+	private boolean isOwnerRole() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		return auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_OWNER"));
+	}
+
+	private User getCurrentUser() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth == null) {
+			return null;
+		}
+		return userRepository.findByEmail(auth.getName()).orElse(null);
 	}
 
 	@Tool(description = "List all veterinarians and their specialties")
@@ -75,6 +96,17 @@ class ChatTools {
 
 	@Tool(description = "Get upcoming scheduled visits for a named owner")
 	List<VisitSummary> getUpcomingVisitsForOwner(String ownerLastName) {
+		if (isOwnerRole()) {
+			User user = getCurrentUser();
+			if (user == null || user.getOwner() == null) {
+				return List.of();
+			}
+			return visitRepository
+				.findUpcomingVisitsByOwnerId(user.getOwner().getId(), LocalDate.now(), LocalDate.now().plusYears(1))
+				.stream()
+				.map(uv -> new VisitSummary(uv.ownerName(), uv.petName(), uv.date(), uv.description()))
+				.toList();
+		}
 		if (ownerLastName == null || ownerLastName.isBlank()) {
 			return List.of();
 		}
@@ -88,6 +120,17 @@ class ChatTools {
 
 	@Tool(description = "Get the next upcoming clinic visits across all owners")
 	List<VisitSummary> getUpcomingVisits() {
+		if (isOwnerRole()) {
+			User user = getCurrentUser();
+			if (user == null || user.getOwner() == null) {
+				return List.of();
+			}
+			return visitRepository
+				.findUpcomingVisitsByOwnerId(user.getOwner().getId(), LocalDate.now(), LocalDate.now().plusYears(1))
+				.stream()
+				.map(uv -> new VisitSummary(uv.ownerName(), uv.petName(), uv.date(), uv.description()))
+				.toList();
+		}
 		return visitRepository.findUpcomingVisits(LocalDate.now(), LocalDate.now().plusYears(1))
 			.stream()
 			.limit(10)

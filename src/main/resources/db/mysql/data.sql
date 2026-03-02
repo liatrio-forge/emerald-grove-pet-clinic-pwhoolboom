@@ -51,3 +51,15 @@ INSERT IGNORE INTO visits VALUES (1, 7, '2010-03-04', 'rabies shot');
 INSERT IGNORE INTO visits VALUES (2, 8, '2011-03-04', 'rabies shot');
 INSERT IGNORE INTO visits VALUES (3, 8, '2009-06-04', 'neutered');
 INSERT IGNORE INTO visits VALUES (4, 7, '2008-09-04', 'spayed');
+
+INSERT IGNORE INTO users VALUES (1, 'admin@petclinic.com', '$2a$10$TQwj5I4Nsm79rik6h5vObu3NGu.3WjlbTJElnDifC2.lnsEi8n4LC', 'ADMIN', null);
+INSERT IGNORE INTO users VALUES (2, 'george.franklin@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 1);
+INSERT IGNORE INTO users VALUES (3, 'betty.davis@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 2);
+INSERT IGNORE INTO users VALUES (4, 'eduardo.rodriquez@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 3);
+INSERT IGNORE INTO users VALUES (5, 'harold.davis@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 4);
+INSERT IGNORE INTO users VALUES (6, 'peter.mctavish@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 5);
+INSERT IGNORE INTO users VALUES (7, 'jean.coleman@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 6);
+INSERT IGNORE INTO users VALUES (8, 'jeff.black@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 7);
+INSERT IGNORE INTO users VALUES (9, 'maria.escobito@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 8);
+INSERT IGNORE INTO users VALUES (10, 'david.schroeder@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 9);
+INSERT IGNORE INTO users VALUES (11, 'carlos.estaban@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 10);

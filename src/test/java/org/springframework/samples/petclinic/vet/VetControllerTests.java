@@ -37,6 +37,12 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.springframework.context.annotation.Import;
+import org.springframework.samples.petclinic.security.OwnerAuthenticationSuccessHandler;
+import org.springframework.samples.petclinic.security.UserRepository;
+import org.springframework.samples.petclinic.security.WebMvcTestSecurityConfig;
+import org.springframework.security.test.context.support.WithMockUser;
+
 /**
  * Test class for the {@link VetController}
  */
@@ -44,6 +50,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(VetController.class)
 @DisabledInNativeImage
 @DisabledInAotMode
+@WithMockUser
+@Import(WebMvcTestSecurityConfig.class)
 class VetControllerTests {
 
 	@Autowired
@@ -51,6 +59,12 @@ class VetControllerTests {
 
 	@MockitoBean
 	private VetRepository vets;
+
+	@MockitoBean
+	private UserRepository userRepository;
+
+	@MockitoBean
+	private OwnerAuthenticationSuccessHandler ownerAuthenticationSuccessHandler;
 
 	private Vet james() {
 		Vet james = new Vet();

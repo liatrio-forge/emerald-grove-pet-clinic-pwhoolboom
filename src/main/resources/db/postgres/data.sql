@@ -52,9 +52,22 @@ INSERT INTO visits (pet_id, visit_date, description) SELECT 8, '2011-03-04', 'ra
 INSERT INTO visits (pet_id, visit_date, description) SELECT 8, '2009-06-04', 'neutered' WHERE NOT EXISTS (SELECT * FROM visits WHERE id=3);
 INSERT INTO visits (pet_id, visit_date, description) SELECT 7, '2008-09-04', 'spayed' WHERE NOT EXISTS (SELECT * FROM visits WHERE id=4);
 
+INSERT INTO users (email, password_hash, role, owner_id) SELECT 'admin@petclinic.com', '$2a$10$TQwj5I4Nsm79rik6h5vObu3NGu.3WjlbTJElnDifC2.lnsEi8n4LC', 'ADMIN', null WHERE NOT EXISTS (SELECT * FROM users WHERE email='admin@petclinic.com');
+INSERT INTO users (email, password_hash, role, owner_id) SELECT 'george.franklin@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 1 WHERE NOT EXISTS (SELECT * FROM users WHERE email='george.franklin@petclinic.com');
+INSERT INTO users (email, password_hash, role, owner_id) SELECT 'betty.davis@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 2 WHERE NOT EXISTS (SELECT * FROM users WHERE email='betty.davis@petclinic.com');
+INSERT INTO users (email, password_hash, role, owner_id) SELECT 'eduardo.rodriquez@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 3 WHERE NOT EXISTS (SELECT * FROM users WHERE email='eduardo.rodriquez@petclinic.com');
+INSERT INTO users (email, password_hash, role, owner_id) SELECT 'harold.davis@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 4 WHERE NOT EXISTS (SELECT * FROM users WHERE email='harold.davis@petclinic.com');
+INSERT INTO users (email, password_hash, role, owner_id) SELECT 'peter.mctavish@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 5 WHERE NOT EXISTS (SELECT * FROM users WHERE email='peter.mctavish@petclinic.com');
+INSERT INTO users (email, password_hash, role, owner_id) SELECT 'jean.coleman@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 6 WHERE NOT EXISTS (SELECT * FROM users WHERE email='jean.coleman@petclinic.com');
+INSERT INTO users (email, password_hash, role, owner_id) SELECT 'jeff.black@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 7 WHERE NOT EXISTS (SELECT * FROM users WHERE email='jeff.black@petclinic.com');
+INSERT INTO users (email, password_hash, role, owner_id) SELECT 'maria.escobito@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 8 WHERE NOT EXISTS (SELECT * FROM users WHERE email='maria.escobito@petclinic.com');
+INSERT INTO users (email, password_hash, role, owner_id) SELECT 'david.schroeder@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 9 WHERE NOT EXISTS (SELECT * FROM users WHERE email='david.schroeder@petclinic.com');
+INSERT INTO users (email, password_hash, role, owner_id) SELECT 'carlos.estaban@petclinic.com', '$2a$10$.GMykgbgS3n0NNtLeY2Tc.5/HRYewotAdfS9ft9uTO4QyTMWSKIO.', 'OWNER', 10 WHERE NOT EXISTS (SELECT * FROM users WHERE email='carlos.estaban@petclinic.com');
+
 SELECT setval(pg_get_serial_sequence('vets', 'id'), COALESCE((SELECT MAX(id) FROM vets), 0));
 SELECT setval(pg_get_serial_sequence('specialties', 'id'), COALESCE((SELECT MAX(id) FROM specialties), 0));
 SELECT setval(pg_get_serial_sequence('types', 'id'), COALESCE((SELECT MAX(id) FROM types), 0));
 SELECT setval(pg_get_serial_sequence('owners', 'id'), COALESCE((SELECT MAX(id) FROM owners), 0));
 SELECT setval(pg_get_serial_sequence('pets', 'id'), COALESCE((SELECT MAX(id) FROM pets), 0));
 SELECT setval(pg_get_serial_sequence('visits', 'id'), COALESCE((SELECT MAX(id) FROM visits), 0));
+SELECT setval(pg_get_serial_sequence('users', 'id'), COALESCE((SELECT MAX(id) FROM users), 0));

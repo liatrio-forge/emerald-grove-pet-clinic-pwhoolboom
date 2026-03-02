@@ -58,9 +58,11 @@ class ChatService {
 		this.chatMemory = chatMemory;
 	}
 
-	Flux<String> chat(String sessionId, String message) {
+	Flux<String> chat(String sessionId, String message, String userContext) {
+		String systemPrompt = (userContext != null && !userContext.isBlank()) ? userContext + "\n\n" + SYSTEM_PROMPT
+				: SYSTEM_PROMPT;
 		return chatClient.prompt()
-			.system(SYSTEM_PROMPT)
+			.system(systemPrompt)
 			.user(message)
 			.advisors(MessageChatMemoryAdvisor.builder(chatMemory).conversationId(sessionId).build())
 			.stream()

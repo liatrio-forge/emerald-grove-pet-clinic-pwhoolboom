@@ -42,7 +42,7 @@ import org.springframework.test.web.servlet.setup.ConfigurableMockMvcBuilder;
  * <p>
  * The filter chain allows all non-API requests and requires authentication for
  * {@code /api/**}, returning 401 (not 302) for unauthenticated API calls. CSRF is
- * disabled for test convenience.
+ * enabled; tests that submit forms must use {@code .with(csrf())}.
  *
  * <p>
  * Usage: annotate the test class with {@code @Import(WebMvcTestSecurityConfig.class)}.
@@ -54,8 +54,6 @@ public class WebMvcTestSecurityConfig {
 	@Bean
 	SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
 		http.authorizeHttpRequests(auth -> auth.requestMatchers("/api/**").authenticated().anyRequest().permitAll())
-			.csrf(csrf -> csrf.disable())
-			.headers(headers -> headers.frameOptions(frame -> frame.disable()))
 			.exceptionHandling(ex -> ex.authenticationEntryPoint(
 					(request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED)));
 		return http.build();

@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -65,7 +66,8 @@ class ChatControllerTests {
 		given(chatService.chat(anyString(), anyString(), any())).willReturn(Flux.just("Hello", " world"));
 
 		mockMvc
-			.perform(post("/api/chat").contentType(APPLICATION_JSON)
+			.perform(post("/api/chat").with(csrf())
+				.contentType(APPLICATION_JSON)
 				.content("{\"message\":\"hi\",\"sessionId\":\"s1\"}"))
 			.andExpect(status().isOk());
 	}
@@ -75,7 +77,8 @@ class ChatControllerTests {
 		given(chatService.chat(anyString(), anyString(), any())).willReturn(Flux.just("Hello", " world"));
 
 		mockMvc
-			.perform(post("/api/chat").contentType(APPLICATION_JSON)
+			.perform(post("/api/chat").with(csrf())
+				.contentType(APPLICATION_JSON)
 				.content("{\"message\":\"hi\",\"sessionId\":\"s1\"}"))
 			.andExpect(content().contentTypeCompatibleWith(TEXT_EVENT_STREAM));
 	}
@@ -83,14 +86,18 @@ class ChatControllerTests {
 	@Test
 	void blankMessage_returns400() throws Exception {
 		mockMvc
-			.perform(post("/api/chat").contentType(APPLICATION_JSON).content("{\"message\":\"\",\"sessionId\":\"s1\"}"))
+			.perform(post("/api/chat").with(csrf())
+				.contentType(APPLICATION_JSON)
+				.content("{\"message\":\"\",\"sessionId\":\"s1\"}"))
 			.andExpect(status().isBadRequest());
 	}
 
 	@Test
 	void blankSessionId_returns400() throws Exception {
 		mockMvc
-			.perform(post("/api/chat").contentType(APPLICATION_JSON).content("{\"message\":\"hi\",\"sessionId\":\"\"}"))
+			.perform(post("/api/chat").with(csrf())
+				.contentType(APPLICATION_JSON)
+				.content("{\"message\":\"hi\",\"sessionId\":\"\"}"))
 			.andExpect(status().isBadRequest());
 	}
 
@@ -98,7 +105,8 @@ class ChatControllerTests {
 	@WithAnonymousUser
 	void unauthenticatedRequest_returns401() throws Exception {
 		mockMvc
-			.perform(post("/api/chat").contentType(APPLICATION_JSON)
+			.perform(post("/api/chat").with(csrf())
+				.contentType(APPLICATION_JSON)
 				.content("{\"message\":\"hi\",\"sessionId\":\"s1\"}"))
 			.andExpect(status().isUnauthorized());
 	}

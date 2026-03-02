@@ -18,6 +18,7 @@ package org.springframework.samples.petclinic.owner;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -90,7 +91,7 @@ class VisitControllerTests {
 	@Test
 	void testProcessNewVisitFormSuccess() throws Exception {
 		mockMvc
-			.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID)
+			.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID).with(csrf())
 				.param("name", "George")
 				.param("description", "Visit Description"))
 			.andExpect(status().is3xxRedirection())
@@ -100,8 +101,8 @@ class VisitControllerTests {
 	@Test
 	void testProcessNewVisitFormHasErrors() throws Exception {
 		mockMvc
-			.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID).param("name",
-					"George"))
+			.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID).with(csrf())
+				.param("name", "George"))
 			.andExpect(model().attributeHasErrors("visit"))
 			.andExpect(status().isOk())
 			.andExpect(view().name("pets/createOrUpdateVisitForm"));
@@ -120,7 +121,7 @@ class VisitControllerTests {
 		void testProcessNewVisitFormWithPastDate() throws Exception {
 			String pastDate = LocalDate.now().minusDays(1).toString();
 			mockMvc
-				.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID)
+				.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID).with(csrf())
 					.param("date", pastDate)
 					.param("description", "Visit Description"))
 				.andExpect(status().isOk())
@@ -133,7 +134,7 @@ class VisitControllerTests {
 		void testProcessNewVisitFormWithTodayDate() throws Exception {
 			String todayDate = LocalDate.now().toString();
 			mockMvc
-				.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID)
+				.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID).with(csrf())
 					.param("date", todayDate)
 					.param("description", "Visit Description"))
 				.andExpect(status().is3xxRedirection())
@@ -144,7 +145,7 @@ class VisitControllerTests {
 		void testProcessNewVisitFormWithFutureDate() throws Exception {
 			String futureDate = LocalDate.now().plusYears(1).toString();
 			mockMvc
-				.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID)
+				.perform(post("/owners/{ownerId}/pets/{petId}/visits/new", TEST_OWNER_ID, TEST_PET_ID).with(csrf())
 					.param("date", futureDate)
 					.param("description", "Visit Description"))
 				.andExpect(status().is3xxRedirection())

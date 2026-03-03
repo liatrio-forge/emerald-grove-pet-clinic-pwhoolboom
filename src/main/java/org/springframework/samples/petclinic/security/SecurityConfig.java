@@ -53,6 +53,8 @@ class SecurityConfig {
 			.requestMatchers("/", "/vets", "/vets.html", "/login", "/register", "/webjars/**", "/resources/**",
 					"/error", "/oups")
 			.permitAll()
+			.requestMatchers("/admin/**")
+			.hasRole("ADMIN")
 			.anyRequest()
 			.authenticated())
 			.formLogin(form -> form.loginPage("/login").successHandler(successHandler).permitAll())

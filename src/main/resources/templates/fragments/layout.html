@@ -72,6 +72,12 @@
             <span th:text="#{error}">Error</span>
           </li>
 
+          <li sec:authorize="hasRole('ADMIN')"
+            th:replace="~{::menuItem ('/admin/users','admin','manage users','users',#{manageUsers})}">
+            <span class="fa fa-users" aria-hidden="true"></span>
+            <span th:text="#{manageUsers}">Manage Users</span>
+          </li>
+
           <!-- Login / Register for anonymous users -->
           <li class="nav-item" sec:authorize="isAnonymous()">
             <a class="nav-link" th:href="@{/login}" th:text="#{nav.login}">Login</a>

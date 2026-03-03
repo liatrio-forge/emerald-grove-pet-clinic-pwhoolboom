@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'admin')}">
+
+<body>
+
+  <h2 th:text="#{users.new.title}">New Admin Account</h2>
+
+  <form th:object="${adminUserForm}" th:action="@{/admin/users/new}" method="post" class="form-horizontal">
+    <div class="form-group has-feedback" th:classappend="${#fields.hasErrors('email')} ? 'has-error'">
+      <label class="col-sm-2 control-label" th:text="#{users.email}">Email</label>
+      <div class="col-sm-10">
+        <input class="form-control" type="email" th:field="*{email}" placeholder="admin@example.com" />
+        <span class="help-inline" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+      </div>
+    </div>
+    <div class="form-group has-feedback" th:classappend="${#fields.hasErrors('password')} ? 'has-error'">
+      <label class="col-sm-2 control-label" th:text="#{login.password.label}">Password</label>
+      <div class="col-sm-10">
+        <input class="form-control" type="password" name="password" id="password" />
+        <span class="help-inline" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button type="submit" class="btn btn-primary" th:text="#{createAdminUser}">Create Admin User</button>
+        <a th:href="@{/admin/users}" class="btn btn-secondary ms-2" th:text="#{deletePet.confirm.cancel}">Cancel</a>
+      </div>
+    </div>
+  </form>
+
+</body>
+
+</html>

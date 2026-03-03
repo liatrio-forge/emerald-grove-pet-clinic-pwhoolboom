@@ -40,9 +40,10 @@ import org.springframework.test.web.servlet.setup.ConfigurableMockMvcBuilder;
  * through the real security filter chain.
  *
  * <p>
- * The filter chain allows all non-API requests and requires authentication for
- * {@code /api/**}, returning 401 (not 302) for unauthenticated API calls. CSRF is
- * enabled; tests that submit forms must use {@code .with(csrf())}.
+ * The filter chain restricts {@code /api/**} to authenticated users (returning 401 for
+ * unauthenticated), restricts {@code /admin/**} to ADMIN-role users (returning 403 for
+ * non-admin and redirecting unauthenticated to login), and permits all other requests.
+ * CSRF is enabled; tests that submit forms must use {@code .with(csrf())}.
  *
  * <p>
  * Usage: annotate the test class with {@code @Import(WebMvcTestSecurityConfig.class)}.
@@ -53,9 +54,19 @@ public class WebMvcTestSecurityConfig {
 
 	@Bean
 	SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
-		http.authorizeHttpRequests(auth -> auth.requestMatchers("/api/**").authenticated().anyRequest().permitAll())
-			.exceptionHandling(ex -> ex.authenticationEntryPoint(
-					(request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED)));
+		http.authorizeHttpRequests(auth -> auth.requestMatchers("/api/**")
+			.authenticated()
+			.requestMatchers("/admin/**")
+			.hasRole("ADMIN")
+			.anyRequest()
+			.permitAll()).exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
+				if (request.getRequestURI().startsWith("/api/")) {
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+				}
+				else {
+					response.sendRedirect("/login");
+				}
+			}));
 		return http.build();
 	}
 

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+
+<html xmlns:th="https://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'admin')}">
+
+<body>
+
+  <h2 th:text="#{users.list.title}">User Management</h2>
+
+  <div th:if="${message}" class="alert alert-success" id="success-message">
+    <span th:text="${message}"></span>
+  </div>
+
+  <div th:if="${error}" class="alert alert-danger" id="error-message">
+    <span th:text="${error}"></span>
+  </div>
+
+  <a th:href="@{/admin/users/new}" class="btn btn-primary mb-3" th:text="#{createAdminUser}">Create Admin User</a>
+
+  <table id="users" class="table table-striped liatrio-table">
+    <thead>
+      <tr>
+        <th th:text="#{users.email}">Email</th>
+        <th th:text="#{users.role}">Role</th>
+        <th th:text="#{users.linkedOwner}">Linked Owner</th>
+        <th th:text="#{users.actions}">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="user : ${users}">
+        <td th:text="${user.email}"></td>
+        <td th:text="${user.role}"></td>
+        <td th:text="${user.owner != null ? user.owner.firstName + ' ' + user.owner.lastName : '—'}"></td>
+        <td>
+          <a th:href="@{/admin/users/__${user.id}__/edit}" class="btn btn-sm btn-secondary" th:text="#{editUser}">Edit</a>
+          <button th:if="${user.id != currentUserId}"
+                  class="btn btn-sm btn-danger ms-1"
+                  th:data-user-id="${user.id}"
+                  th:data-user-email="${user.email}"
+                  th:data-has-owner="${user.owner != null}"
+                  data-bs-toggle="modal"
+                  data-bs-target="#deleteUserModal"
+                  th:text="#{deleteUser}">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Delete User Modal -->
+  <div class="modal fade" id="deleteUserModal" tabindex="-1"
+       aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteUserModalLabel" th:text="#{users.delete.confirm.title}">Confirm Delete User</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="deleteUserModalBody"></p>
+          <div id="cascadeCheckboxWrapper" style="display:none;">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="cascadeOwnerCheck" name="cascadeOwner" value="true" form="deleteUserForm">
+              <label class="form-check-label" for="cascadeOwnerCheck" th:text="#{users.delete.cascade.label}">
+                Also delete the linked owner record (and all their pets and visits)
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{deletePet.confirm.cancel}">Cancel</button>
+          <form id="deleteUserForm" method="post">
+            <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button type="submit" class="btn btn-danger" th:text="#{deletePet.confirm.button}">Confirm Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+    var confirmBodyTemplate = /*[[#{users.delete.confirm.body}]]*/ 'Are you sure you want to delete the account for {0}?';
+    /*]]>*/
+    document.addEventListener('DOMContentLoaded', function () {
+      var deleteUserModal = document.getElementById('deleteUserModal');
+      if (deleteUserModal) {
+        deleteUserModal.addEventListener('show.bs.modal', function (event) {
+          var button = event.relatedTarget;
+          var userId = button.getAttribute('data-user-id');
+          var userEmail = button.getAttribute('data-user-email');
+          var hasOwner = button.getAttribute('data-has-owner') === 'true';
+
+          document.getElementById('deleteUserModalBody').textContent =
+            confirmBodyTemplate.replace('{0}', userEmail);
+
+          document.getElementById('deleteUserForm').setAttribute('action', '/admin/users/' + userId + '/delete');
+
+          var cascadeWrapper = document.getElementById('cascadeCheckboxWrapper');
+          var cascadeCheck = document.getElementById('cascadeOwnerCheck');
+          if (hasOwner) {
+            cascadeWrapper.style.display = '';
+          } else {
+            cascadeWrapper.style.display = 'none';
+            cascadeCheck.checked = false;
+          }
+        });
+      }
+
+      // Auto-hide flash messages after 3 seconds
+      setTimeout(function () {
+        var successMsg = document.getElementById('success-message');
+        var errorMsg = document.getElementById('error-message');
+        if (successMsg) { successMsg.style.display = 'none'; }
+        if (errorMsg) { errorMsg.style.display = 'none'; }
+      }, 3000);
+    });
+  </script>
+
+</body>
+
+</html>

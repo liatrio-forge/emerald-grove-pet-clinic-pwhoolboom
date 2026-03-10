@@ -1,0 +1,19 @@
+name: Conventional PR Title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches: [main]
+
+jobs:
+  validate-pr-title:
+    runs-on: ubuntu-latest
+    permissions:
+      statuses: write
+      pull-requests: read
+
+    steps:
+      - name: Validate PR title
+        uses: liatrio/github-actions/conventional-pr-title@0b41561cca6822cc8d880fe0e49e7807a41fdf91
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}

@@ -18,6 +18,12 @@ resource "aws_ecs_task_definition" "main" {
   execution_role_arn       = aws_iam_role.execution.arn
   task_role_arn            = aws_iam_role.task.arn
 
+  tags = {
+    Name        = "${var.project_name}-${var.environment}"
+    Project     = var.project_name
+    Environment = var.environment
+  }
+
   container_definitions = jsonencode([
     {
       name  = "pet-clinic"

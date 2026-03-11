@@ -9,4 +9,5 @@
 	<suppress files="target[\\/].*" checks=".*"/>
 	<suppress files="e2e-tests[\\/]test-results[\\/].*" checks=".*"/>
 	<suppress files=".+\.(jar|git|ico|p12|gif|jks|jpg|svg|log)" checks="NoHttp"/>
+	<suppress files="infra[\\/].*" checks=".*"/>
 </suppressions>

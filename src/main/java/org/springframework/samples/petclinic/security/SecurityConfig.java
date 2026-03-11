@@ -53,10 +53,13 @@ class SecurityConfig {
 			.requestMatchers("/", "/vets", "/vets.html", "/login", "/register", "/webjars/**", "/resources/**",
 					"/error", "/oups")
 			.permitAll()
+			.requestMatchers("/api/**")
+			.permitAll()
 			.requestMatchers("/admin/**")
 			.hasRole("ADMIN")
 			.anyRequest()
 			.authenticated())
+			.csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
 			.formLogin(form -> form.loginPage("/login").successHandler(successHandler).permitAll())
 			.logout(logout -> logout.logoutUrl("/logout")
 				.logoutSuccessUrl("/login?logout")

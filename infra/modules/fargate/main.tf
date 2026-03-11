@@ -85,4 +85,10 @@ resource "aws_ecs_service" "main" {
   }
 
   depends_on = [aws_lb_listener.http]
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}"
+    Project     = var.project_name
+    Environment = var.environment
+  }
 }

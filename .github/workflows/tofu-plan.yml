@@ -1,0 +1,51 @@
+name: Tofu Plan
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+jobs:
+  tofu-plan:
+    name: tofu plan
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@9d84900f3238fab8cd84ce47d658d25dd008be2f # v1.0.8
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: github-actions-tofu-plan
+
+      - name: Tofu Init
+        working-directory: infra/envs/dev
+        run: tofu init
+
+      - name: Tofu Plan
+        working-directory: infra/envs/dev
+        run: |
+          tofu plan -out=tfplan \
+            -var="project_name=pwhoolboom" \
+            -var="aws_account_id=${{ secrets.AWS_ACCOUNT_ID }}"
+          tofu show -json tfplan > tfplan.json
+
+      - name: Comment Plan on PR
+        uses: liatrio/terraform-change-pr-commenter@0050454ca62e2839dc35022bfbd474a139c2c65d
+        with:
+          json-file: infra/envs/dev/tfplan.json
+          expand-comment: "true"
+          include-plan-job-summary: "true"
+          include-workflow-link: "true"
+          hide-previous-comments: "true"

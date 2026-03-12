@@ -22,11 +22,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.Container.ExecResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledInNativeImage;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.restclient.RestTemplateBuilder;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -47,11 +50,22 @@ import org.testcontainers.ollama.OllamaContainer;
  * The test is skipped gracefully when Docker is not available.
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT,
-		properties = "spring.ai.anthropic.api-key=test-placeholder")
+		properties = { "spring.ai.anthropic.api-key=test-placeholder",
+				"spring.main.allow-bean-definition-overriding=true" })
 @Testcontainers(disabledWithoutDocker = true)
 @DisabledInNativeImage
 @DisabledInAotMode
 class ChatIntegrationTests {
+
+	@TestConfiguration
+	static class TestChatConfig {
+
+		@Bean
+		ChatClient chatClient(ChatClient.Builder builder) {
+			return builder.build();
+		}
+
+	}
 
 	@Container
 	static OllamaContainer ollama = new OllamaContainer(

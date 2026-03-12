@@ -11,11 +11,11 @@ output "alb_arn" {
 }
 
 output "ecs_service_name" {
-  value = aws_ecs_service.main.name
+  value = aws_ecs_service.pet-clinic.name
 }
 
 output "ecs_task_definition_arn" {
-  value = aws_ecs_task_definition.main.arn
+  value = aws_ecs_task_definition.pet-clinic.arn
 }
 
 output "cloudwatch_log_group" {

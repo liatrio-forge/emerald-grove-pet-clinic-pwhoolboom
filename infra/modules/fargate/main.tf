@@ -9,7 +9,7 @@ resource "aws_cloudwatch_log_group" "main" {
   }
 }
 
-resource "aws_ecs_task_definition" "main" {
+resource "aws_ecs_task_definition" "pet-clinic" {
   family                   = "${var.project_name}-${var.environment}"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -65,10 +65,10 @@ resource "aws_ecs_task_definition" "main" {
   ])
 }
 
-resource "aws_ecs_service" "main" {
+resource "aws_ecs_service" "pet-clinic" {
   name            = "${var.project_name}-${var.environment}"
   cluster         = local.ecs_cluster_name
-  task_definition = aws_ecs_task_definition.main.arn
+  task_definition = aws_ecs_task_definition.pet-clinic.arn
   desired_count   = var.desired_count
   launch_type     = "FARGATE"
 
